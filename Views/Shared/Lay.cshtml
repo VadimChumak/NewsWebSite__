@@ -18,11 +18,12 @@
 
 
 </head>
+
 <body>
     <ul id="dropdown1" class="dropdown-content">
         <li><a href="@Url.Action("Index", "Account")">Профиль</a></li>
         <li><a href="@Url.Action("CreateArticle", "News")">Создать новость</a></li>
-        <li><a href="@Url.Action("InterestingNews", "News")">Интерестные новости</a></li>
+        <li><a href="@Url.Action("Index", "News", new { isInterestingNews = true })">Интерестные новости</a></li>
         <li><a href="@Url.Action("Index", "News", new { isUserNews = true })">Мои новости</a></li>
         <li class="divider"></li>
         <li><a href="@Url.Action("LogOff", "Account")">Выйти</a></li>

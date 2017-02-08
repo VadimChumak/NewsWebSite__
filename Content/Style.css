@@ -46,6 +46,7 @@
     font-size: 18px;
     margin-bottom: 3px;
 }
+ .grid-item {float:left; width:450px; }
 /*
 .commentDate {
     top: 5px;

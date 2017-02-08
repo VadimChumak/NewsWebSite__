@@ -42,6 +42,9 @@ namespace NewsWebSite.Controllers
 
         #region ForDebug
 
+        
+
+
         [HttpGet]
         public ActionResult CreateLines(int n = 0)
         {
@@ -61,14 +64,23 @@ namespace NewsWebSite.Controllers
         #endregion
 
 
-        public ActionResult Index(bool isUserNews = false)
+        public ActionResult Index(bool isUserNews = false, bool isInterestingNews = false)
         {
+            var list = new PagedList<DemoArticle>();
             int userId = 0;
+            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
             if (isUserNews == true)
             {
-                userId = User.Identity.GetUserId<int>();
+                userId = currentUser.Id;
             }
-            var list = repo.GetDemoList(new ArticleCriteria() {StartFrom = 0, UserId = userId, Count = NumberOfItemsOnPage, LastId = 0 });
+            if (isInterestingNews != true)
+            {
+                list = repo.GetDemoList(new ArticleCriteria() { StartFrom = 0, UserId = userId, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
+            else
+            {
+                list = repo.GetArticleByTags(currentUser.Tags, new ArticleCriteria() { StartFrom = 0, UserId = 0, Count = NumberOfItemsOnPage, LastId = 0 });
+            }
             return View(list);
         }
 
@@ -142,22 +154,6 @@ namespace NewsWebSite.Controllers
             return View(editArticle);
         }
         
-        public ActionResult InterestingNews()
-        {
-            AppUser currentUser = userRepo.GetById(User.Identity.GetUserId<int>());
-            List<ArticleForView> interestingArticles = new List<ArticleForView>();
-            foreach(Tag tag in currentUser.Tags)
-            {
-                foreach(Article article in tag.Articles)
-                {
-                    if(!interestingArticles.Select(m=>m.Id).Contains(article.Id))
-                    {
-                        interestingArticles.Add(new ArticleForView(article));
-                    }
-                }
-            }
-            return View(interestingArticles);
-        }
 
         [HttpPost]
         [Authorize]

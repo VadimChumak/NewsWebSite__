@@ -1,4 +1,5 @@
-﻿using NHibernate;
+﻿using NewsWebSite.Models.ViewModel;
+using NHibernate;
 using NHibernate.Criterion;
 using NHibernate.Transform;
 using System;
@@ -93,6 +94,38 @@ namespace NewsWebSite.Models.Repository
             {
                 var count = session.QueryOver<Article>().Select(Projections.RowCount()).FutureValue<int>().Value;
                 return count;
+            }
+        }
+
+        public PagedList<DemoArticle> GetArticleByTags(IEnumerable<Tag> tags, ArticleCriteria cr)
+        {
+            using (var session = sessionFactory.OpenSession())
+            {
+                ICriteria filter = session.CreateCriteria(typeof(Article));
+                if (cr.LastId > 0) filter.Add(Restrictions.Lt("Id", cr.LastId));
+
+                else filter.SetFirstResult(cr.StartFrom);
+                filter.CreateAlias("Tags", "tag");
+                filter.Add(Expression.In("tag.Id", tags.Select(m=>m.Id).ToArray()));
+                //criteria.SetProjection(Projections.Distinct(Projections.Property("Id")));
+
+                var result = new PagedList<DemoArticle>();
+                var countCreteria = (ICriteria)filter.Clone();
+                result.AddRange(
+                    filter
+                    .SetProjection(Projections.Distinct(Projections.ProjectionList()
+                    .Add(Projections.Id(), "Id")
+                    .Add(Projections.Property("Title"), "Title")
+                    .Add(Projections.Property("Image"), "Image")
+                    .Add(Projections.Property("ShortDescription"), "ShortDescription")
+                    .Add(Projections.Property("CreateDate"), "CreateDate")
+                    .Add(Projections.Property("LastUpdateDate"), "LastUpdateDate")))
+                    .AddOrder(Order.Desc("Id"))
+                    .SetResultTransformer(Transformers.AliasToBean<DemoArticle>())
+                    .List<DemoArticle>());
+                result.LinesCount = countCreteria.SetProjection(Projections.RowCount()).UniqueResult<int>();
+                result.PageCount = (int)Math.Ceiling(result.LinesCount / (double)cr.Count);
+                return result;
             }
         }
     }

@@ -12,8 +12,8 @@ namespace NewsWebSite.Models.ViewModel
         public string ShortDescription { get; set; }
         public string FullDescription { get; set; }
         public string Image { get; set; }
-        public string CreateDate { get; set; }
-        public string UpdateDate { get; set; }
+        public DateTime CreateDate { get; set; }
+        public DateTime UpdateDate { get; set; }
         public bool Editable { get; set; }
 
         public ISet<Tag> ArticleTags { get; set; }
@@ -26,8 +26,8 @@ namespace NewsWebSite.Models.ViewModel
             Image = a.Image;
             ArticleTags = a.Tags;
             ShortDescription = a.ShortDescription;
-            CreateDate = a.CreateDate.ToString("dd.MM.yyyy H:mm:ss");
-            UpdateDate = (a.CreateDate != a.LastUpdateDate ? a.LastUpdateDate.ToString("dd.MM.yyyy H:mm:ss") : null);
+            CreateDate = a.CreateDate;
+            UpdateDate = (a.CreateDate != a.LastUpdateDate ? a.LastUpdateDate : a.CreateDate);
             Editable = false;
         }
         public ArticleForView() { }
